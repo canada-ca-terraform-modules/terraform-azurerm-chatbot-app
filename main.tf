@@ -35,10 +35,12 @@ output "MicrosoftAppPassword" {
 }
 
 resource "azurerm_app_service_plan" "Chatbot-serviceplan" {
+  count = var.plan_id == "" ? 1 : 0
   name                = "${var.prefix}-app-svcplan"
   location            = var.location
   resource_group_name = var.resourceGroupName
-
+  kind = var.plan_kind == "" ? "Windows" : var.plan_kind
+  reserved = var.plan_reserved
   sku {
     tier = var.bot_tier
     size = var.bot_size
@@ -67,7 +69,7 @@ resource "azurerm_template_deployment" "Chatbot-app-svc" {
       "appId" = "${var.appId}"  //"${azuread_application.Chatbot-adapp.application_id}"
       "appSecret" = "${var.appPassword}" //"${azuread_application_password.Chatbot-adapp-password.value}"
       "zipUrl" = "${var.zipUrl}"
-      "serverFarmId" = "${azurerm_app_service_plan.Chatbot-serviceplan.id}" //"/subscriptions/${data.azurerm_subscription.current.id}/resourceGroups/${var.resourceGroupName}/providers/Microsoft.Web/serverfarms/ScDc-CIOCPS-StudentChatbot-app-svcplan"
+      "serverFarmId" = "${var.plan_id == "" ? azurerm_app_service_plan.Chatbot-svcplan[0].id : var.plan_id}" //"/subscriptions/${data.azurerm_subscription.current.id}/resourceGroups/${var.resourceGroupName}/providers/Microsoft.Web/serverfarms/ScDc-CIOCPS-StudentChatbot-app-svcplan"
       "QnAKnowledgebaseId" =  "${replace(var.QnAKnowledgebaseId, "//knowledgebases//","")}"
       "QnAAuthKey" =  "${var.QnAAuthKey}"
       "QnAEndpointHostName" =  "${var.QnAEndpointHostName}"
