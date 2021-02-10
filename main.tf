@@ -9,7 +9,7 @@
 //  name                       = "${var.prefix}-wapp"
 //  oauth2_permissions = []
 //  oauth2_allow_implicit_flow = false
- // reply_urls = null
+// reply_urls = null
 //}
 
 output "MicrosoftAppId" {
@@ -35,10 +35,12 @@ output "MicrosoftAppPassword" {
 }
 
 resource "azurerm_app_service_plan" "Chatbot-serviceplan" {
+  count               = var.plan_id == "" ? 1 : 0
   name                = "${var.prefix}-app-svcplan"
   location            = var.location
   resource_group_name = var.resourceGroupName
-
+  kind                = var.plan_kind == "" ? "Windows" : var.plan_kind
+  reserved            = var.plan_reserved
   sku {
     tier = var.bot_tier
     size = var.bot_size
@@ -51,28 +53,28 @@ resource "azurerm_application_insights" "Chatbot-app-ai" {
   location            = var.location
   resource_group_name = var.resourceGroupName
   application_type    = "web"
-  tags = var.tags
+  tags                = var.tags
 }
 
 
 resource "azurerm_template_deployment" "Chatbot-app-svc" {
-   name                = "${var.prefix}-svc"
-   resource_group_name = var.resourceGroupName
-   template_body = data.template_file.webapp_template.rendered
-    # =============== ARM TEMPLATE PARAMETERS =============== #
+  name                = "${var.prefix}-svc"
+  resource_group_name = var.resourceGroupName
+  template_body       = data.template_file.webapp_template.rendered
+  # =============== ARM TEMPLATE PARAMETERS =============== #
   parameters = {
-      "location" = "${var.location}"
-      "kind" = "${var.kind}"
-      "siteName" = "${var.prefix}-svc"
-      "appId" = "${var.appId}"  //"${azuread_application.Chatbot-adapp.application_id}"
-      "appSecret" = "${var.appPassword}" //"${azuread_application_password.Chatbot-adapp-password.value}"
-      "zipUrl" = "${var.zipUrl}"
-      "serverFarmId" = "${azurerm_app_service_plan.Chatbot-serviceplan.id}" //"/subscriptions/${data.azurerm_subscription.current.id}/resourceGroups/${var.resourceGroupName}/providers/Microsoft.Web/serverfarms/ScDc-CIOCPS-StudentChatbot-app-svcplan"
-      "QnAKnowledgebaseId" =  "${replace(var.QnAKnowledgebaseId, "//knowledgebases//","")}"
-      "QnAAuthKey" =  "${var.QnAAuthKey}"
-      "QnAEndpointHostName" =  "${var.QnAEndpointHostName}"
+    "location"            = "${var.location}"
+    "kind"                = "${var.kind}"
+    "siteName"            = "${var.prefix}-svc"
+    "appId"               = "${var.appId}"       //"${azuread_application.Chatbot-adapp.application_id}"
+    "appSecret"           = "${var.appPassword}" //"${azuread_application_password.Chatbot-adapp-password.value}"
+    "zipUrl"              = "${var.zipUrl}"
+    "serverFarmId"        = "${var.plan_id == "" ? azurerm_app_service_plan.Chatbot-svcplan[0].id : var.plan_id}" //"/subscriptions/${data.azurerm_subscription.current.id}/resourceGroups/${var.resourceGroupName}/providers/Microsoft.Web/serverfarms/ScDc-CIOCPS-StudentChatbot-app-svcplan"
+    "QnAKnowledgebaseId"  = "${replace(var.QnAKnowledgebaseId, "//knowledgebases//", "")}"
+    "QnAAuthKey"          = "${var.QnAAuthKey}"
+    "QnAEndpointHostName" = "${var.QnAEndpointHostName}"
   }
-  deployment_mode = "Incremental"     # Deployment => incremental (complete is too destructive in our case) 
+  deployment_mode = "Incremental" # Deployment => incremental (complete is too destructive in our case) 
 
 }
 
@@ -112,13 +114,17 @@ resource "azurerm_template_deployment" "Chatbot-app-svc" {
 # }
 
 resource "azurerm_bot_web_app" "Chatbot-app" {
-  name                = "${var.prefix}-wapp"
-  location            = "global"
-  resource_group_name = var.resourceGroupName
-  sku                 = var.bot_sku
-  microsoft_app_id    = var.appId //azuread_application.Chatbot-adapp.application_id
-  developer_app_insights_key = azurerm_application_insights.Chatbot-app-ai.instrumentation_key
+  name                                  = "${var.prefix}-wapp"
+  location                              = "global"
+  resource_group_name                   = var.resourceGroupName
+  sku                                   = var.bot_sku
+  microsoft_app_id                      = var.appId //azuread_application.Chatbot-adapp.application_id
+  developer_app_insights_key            = azurerm_application_insights.Chatbot-app-ai.instrumentation_key
   developer_app_insights_application_id = azurerm_application_insights.Chatbot-app-ai.app_id
-  endpoint = "https://${var.prefix}-svc.azurewebsites.net/api/messages"
-  tags = var.tags
+  endpoint                              = "https://${var.prefix}-svc.azurewebsites.net/api/messages"
+  tags                                  = var.tags
+}
+
+output "ChatbotApp" {
+  value = azurerm_template_deployment.Chatbot-app-svc
 }

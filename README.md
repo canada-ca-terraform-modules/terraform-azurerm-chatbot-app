@@ -56,6 +56,9 @@ module "Chatbot-App" {
 | zipUrl                                  | string | no        | The url for your bot code.  See [Generic Example](https://bot-framework.azureedge.net/static/137365-f175dfa671/bot-packages/v1.3.27-135455/csharp-abs-webapp-v4_qnabot_precompiled.zip) |
 | appId                                   | string | yes        | The appID for your app registration account. See [Application registration Account](https://docs.microsoft.com/en-us/azure/bot-service/bot-service-resources-bot-framework-faq?view=azure-bot-service-3.0#app-registration)  |
 | AppPassword                             | string | yes        | The appPassword (secret) in your app registration account |
+| plan_id                             | string | no        | The service plan to use.  If left out it will create one |
+| plan_reserved                             | string | no        | If the service plan is reserved.  Defaults to false.  Must be true for Linux plans. |
+| plan_kind                             | string | no        | The kind of the App Service Plan to create. Possible values are Windows (also available as App), Linux, elastic (for Premium Consumption) and FunctionApp (for a Consumption Plan). Defaults to Windows. Changing this forces a new resource to be created. |
 
 ### tag object
 
@@ -78,3 +81,5 @@ tags = {
 | Date     | Release    | Change                                                                                                |
 | -------- | ---------- | ----------------------------------------------------------------------------------------------------- |
 | 20200708 | 20200708.1 | 1st commit                                                                                            |
+| 20201014 | 20201014.1 | Allowing for passing in a application service plan_id 
+                          Added plan_reserved.  Defaults to false.  Linux plans must be true.|
