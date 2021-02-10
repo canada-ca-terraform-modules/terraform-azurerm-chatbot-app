@@ -34,7 +34,7 @@ output "MicrosoftAppPassword" {
   value = var.appPassword
 }
 
-resource "azurerm_app_service_plan" "Chatbot-serviceplan" {
+resource "azurerm_app_service_plan" "Chatbot-svcplan" {
   count               = var.plan_id == "" ? 1 : 0
   name                = "${var.prefix}-app-svcplan"
   location            = var.location
@@ -83,7 +83,7 @@ resource "azurerm_template_deployment" "Chatbot-app-svc" {
 #   name                = "${var.prefix}-svc"
 #   location            = var.location
 #   resource_group_name = var.resourceGroupName
-#   app_service_plan_id = azurerm_app_service_plan.Chatbot-serviceplan.id
+#   app_service_plan_id = azurerm_app_service_plan.Chatbot-svcplan.id
 
 #   site_config {
 #     dotnet_framework_version = "v4.0"
@@ -108,7 +108,7 @@ resource "azurerm_template_deployment" "Chatbot-app-svc" {
 #   }
 
 #   depends_on = [
-#       azurerm_app_service_plan.Chatbot-serviceplan, azuread_application_password.Chatbot-adapp-password
+#       azurerm_app_service_plan.Chatbot-svcplan, azuread_application_password.Chatbot-adapp-password
 #   ]
 #   tags = var.tags
 # }
