@@ -83,6 +83,7 @@
                         }
                     ],
                     "webSocketsEnabled": true,
+                    "httpsOnly": true,
                     "cors": {
                         "allowedOrigins": [
                             "https://portal.azure.com",
