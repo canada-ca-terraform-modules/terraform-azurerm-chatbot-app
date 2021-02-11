@@ -34,7 +34,7 @@ output "MicrosoftAppPassword" {
   value = var.appPassword
 }
 
-resource "azurerm_app_service_plan" "Chatbot-serviceplan" {
+resource "azurerm_app_service_plan" "Chatbot-svcplan" {
   count               = var.plan_id == "" ? 1 : 0
   name                = "${var.prefix}-app-svcplan"
   location            = var.location
