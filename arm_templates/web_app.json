@@ -115,5 +115,11 @@
             ],
             "condition": "[not(equals(parameters('zipUrl'), ''))]"
         }
-    ]
+    ],
+    "outputs": {
+        "id" :{
+            "type": "string",
+             "value": "[resourceId('Microsoft.Web/sites', parameters('siteName'))]"
+        }
+    }
 }
